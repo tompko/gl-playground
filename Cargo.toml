@@ -5,3 +5,7 @@ authors = ["tompko"]
 
 [dependencies]
 glium = "*"
+time = "0.1"
+regex = "0.2"
+lazy_static = "0.2"
+notify="4.0"

@@ -1,0 +1,5 @@
+shaders/norm.vert(2) : error C0201: unsupported version 450
+shaders/norm.vert(3) : warning C7532: global type vec2 requires "#version 100" or later
+shaders/norm.vert(4) : error C5060: out can't be used with non-varying fragCoord
+shaders/norm.vert(7) : warning C7532: global variable gl_Position requires "#version 100" or later
+shaders/norm.vert(7) : warning C7532: global type vec4 requires "#version 100" or later
