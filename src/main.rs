@@ -10,8 +10,9 @@ mod shader;
 
 use std::sync::mpsc::{channel, TryRecvError};
 use std::time::Duration;
-use glium::{DisplayBuild, Surface};
+use glium::{DisplayBuild, Rect, Surface};
 use glium::glutin::VirtualKeyCode;
+use glium::draw_parameters::DrawParameters;
 use notify::{RecommendedWatcher, Watcher, RecursiveMode};
 use time::precise_time_s;
 use shader::Shader;
@@ -54,15 +55,15 @@ fn main() {
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TriangleStrip);
 
     let mut program = load_shaders(&display).unwrap();
-    // let vertex_shader = Shader::load("shaders/norm.vert").unwrap();
-    // let fragment_shader = Shader::load("shaders/est.frag").unwrap();
 
-    // let program = glium::Program::from_source(
-    //     &display,
-    //     vertex_shader.as_source(),
-    //     fragment_shader.as_source(),
-    //     None,
-    // ).unwrap();
+    let dimensions = display.get_framebuffer_dimensions();
+    let resolution = (dimensions.0 as i32, dimensions.1 as i32);
+
+    let mut draw_params: DrawParameters = Default::default();
+    draw_params.viewport = Some(Rect{
+        left: 0, bottom: 0,
+        width: dimensions.0, height: dimensions.1,
+    });
 
     let start = precise_time_s();
 
@@ -72,13 +73,13 @@ fn main() {
         let mut target = display.draw();
         let uniforms = uniform! {
             iGlobalTime: t,
-            iResolution: (1, 1),
+            iResolution: resolution,
             iMouse: (0, 0),
         };
 
         target.clear_color(0.0, 1.0, 1.0, 1.0);
         target.draw(&vertex_buffer, &indices, &program, &uniforms,
-                                &Default::default()).unwrap();
+                                &draw_params).unwrap();
         target.finish().unwrap();
 
         for ev in display.poll_events() {

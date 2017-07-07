@@ -88,7 +88,7 @@ TraceResult trace(vec3 o, vec3 d) {
 }
 
 void main() {
-    vec2 uv = fragCoord.xy / iResolution.xy - .5;
+    vec2 uv = gl_FragCoord.xy / iResolution.xy - .5;
 
     uv *= tan(radians (FOV) / 2.0) * 1.1;
 
