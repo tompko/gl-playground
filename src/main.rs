@@ -42,7 +42,7 @@ fn main() {
 
     watcher.watch("shaders", RecursiveMode::Recursive).unwrap();
 
-    let display = glium::glutin::WindowBuilder::new().build_glium().unwrap();
+    let display = glium::glutin::WindowBuilder::new().with_vsync().build_glium().unwrap();
 
     let vertex1 = Vertex { position: [-1.0, -1.0] };
     let vertex2 = Vertex { position: [ -1.0,  1.0] };
