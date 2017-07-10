@@ -37,3 +37,24 @@ vec3 pointLight(
 
 		return (objCol * (diff + .15) * spec * atten);
 }
+
+vec3 rotateX(vec3 x, float an)
+{
+    float c = -cos(an);
+    float s = -sin(an);
+    return vec3(x.x, x.y * c - x.z * s, x.z * c + x.y * s);
+}
+
+vec3 rotateY(vec3 x, float an)
+{
+    float c = cos(an);
+    float s = sin(an);
+    return vec3(x.x * c - x.z * s, x.y, x.z * c + x.x * s);
+}
+
+vec3 rotateZ(vec3 x, float an)
+{
+    float c = cos(an);
+    float s = sin(an);
+    return vec3(x.x * c - x.y * s, x.y * c + x.x * s, x.z);
+}

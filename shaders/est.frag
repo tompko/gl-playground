@@ -1,8 +1,8 @@
 #version 450
 
 uniform float iGlobalTime;
-uniform ivec2 iResolution;
-uniform ivec2 iMouse;
+uniform vec2 iResolution;
+uniform vec2 iMouse;
 
 in vec2 fragCoord;
 out vec4 fragColor;

@@ -89,35 +89,30 @@ TraceResult trace(vec3 o, vec3 d) {
 }
 
 void main() {
-		vec2 uv = gl_FragCoord.xy / iResolution.xy - .5;
+	vec2 uv = (gl_FragCoord.xy * 2.0 - iResolution.xy) / iResolution.y;
 
-    uv *= tan(radians (FOV) / 2.0) * 1.1;
+    float fovDegrees = 40.0;
+    float fovRadians = fovDegrees / 180.0 * 3.14159265;
+    float fovTan = tan(fovRadians / 2.0);
+    vec3 eyeDir = normalize(vec3(uv * fovTan, -1.0));
 
-    float
-        sk = sin(-t * .1) * 82.0,
-        ck = cos(-t * .1) * 82.0,
-    	  sh,
-        ao,
-        fog;
+    float camRotX = (iMouse.y / iResolution.y * 2.0 - 1.0) * 3.14159265;
+    float camRotY = (iMouse.x / iResolution.x * 2.0 - 1.0) * 3.14159265;
+    float camRotZ = 0.0;
 
-    vec3
-        vuv = vec3(0., 1., -0.), // up
-    		eyePos = vec3(ck, 20., sk) + vec3(iMouse.x / 20.,iMouse.y / 10. - 1., 1.), // pos
-    		vrp =  vec3(0., 0., 0.),
-    		vpn = normalize(vrp - eyePos),
-    		u = normalize(cross(vuv, vpn)),
-    		v = cross(vpn, u),
-    		vcv = (eyePos + vpn),
-    		scrCoord = (vcv + uv.x * u * iResolution.x/iResolution.y + uv.y * v),
-    		eyeDir = normalize(scrCoord - eyePos),
-    		sceneColor = eyeDir,
-        p2,
-        sn;
+    eyeDir = rotateZ(eyeDir, camRotZ);
+    eyeDir = rotateX(eyeDir, camRotX);
+    eyeDir = rotateY(eyeDir, camRotY);
+
+    vec3 eyePos = vec3(0.0, 0.0, 50.0);
+    eyePos = rotateX(eyePos, camRotX);
+    eyePos = rotateY(eyePos, camRotY);
+
 		TraceResult tr = trace(eyePos, eyeDir);
 
-    sn = getNormal(tr.hitPosition);
+    vec3 sn = getNormal(tr.hitPosition);
 
-    fog = smoothstep(FAR * FOG, 0., tr.dist) * 1.,
+    float fog = smoothstep(FAR * FOG, 0., tr.dist) * 1.,
     sh = softShadow(tr.hitPosition, light, 2.),
     ao = getAO(tr.hitPosition, sn, 1.2);
 
@@ -126,6 +121,7 @@ void main() {
 
 		vec3 background = backgroundColour(eyeDir);
 
+		vec3 sceneColor;
     if (tr.dist < FAR) {
 				Material mat = sceneMaterial(tr.materialIndex);
     		sceneColor = saturate(

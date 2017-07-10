@@ -11,7 +11,7 @@ mod shader;
 use std::sync::mpsc::{channel, TryRecvError};
 use std::time::Duration;
 use glium::{DisplayBuild, Rect, Surface};
-use glium::glutin::VirtualKeyCode;
+use glium::glutin::{VirtualKeyCode, Event, MouseButton, ElementState};
 use glium::draw_parameters::DrawParameters;
 use notify::{RecommendedWatcher, Watcher, RecursiveMode};
 use time::precise_time_s;
@@ -43,6 +43,7 @@ fn main() {
     watcher.watch("shaders", RecursiveMode::Recursive).unwrap();
 
     let display = glium::glutin::WindowBuilder::new().with_vsync().build_glium().unwrap();
+    let window = display.get_window().unwrap();
 
     let vertex1 = Vertex { position: [-1.0, -1.0] };
     let vertex2 = Vertex { position: [ -1.0,  1.0] };
@@ -56,8 +57,12 @@ fn main() {
 
     let mut program = load_shaders(&display).unwrap();
 
-    let dimensions = display.get_framebuffer_dimensions();
-    let resolution = (dimensions.0 as i32, dimensions.1 as i32);
+    let dimensions = window.get_inner_size_pixels().unwrap();
+    let resolution = (dimensions.0 as f32, dimensions.1 as f32);
+
+    let mut mouse_position = (0, 0);
+    let mut mouse_dragging = false;
+    let mut mouse_shader_position = (0.0, 0.0);
 
     let mut draw_params: DrawParameters = Default::default();
     draw_params.viewport = Some(Rect{
@@ -74,7 +79,7 @@ fn main() {
         let uniforms = uniform! {
             iGlobalTime: t,
             iResolution: resolution,
-            iMouse: (0, 0),
+            iMouse: mouse_shader_position,
         };
 
         target.clear_color(0.0, 1.0, 1.0, 1.0);
@@ -84,8 +89,22 @@ fn main() {
 
         for ev in display.poll_events() {
             match ev {
-                glium::glutin::Event::Closed => return,
-                glium::glutin::Event::KeyboardInput(_, _, Some(VirtualKeyCode::Escape)) => return,
+                Event::Closed => return,
+                Event::KeyboardInput(_, _, Some(VirtualKeyCode::Escape)) => return,
+                Event::MouseMoved(x, y) => {
+                    if mouse_dragging {
+                        let delta = (mouse_position.0 - x, y - mouse_position.1);
+                        mouse_shader_position = (
+                            mouse_shader_position.0 - delta.0 as f32,
+                            mouse_shader_position.1 - delta.1 as f32,
+                        );
+                    }
+                    mouse_position = (x, y);
+                },
+                Event::MouseInput(state, MouseButton::Left) => {
+                    mouse_dragging = state == ElementState::Pressed;
+                }
+
                 _ => (),
             }
         }
